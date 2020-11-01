@@ -6,6 +6,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,44 +32,39 @@ Button To_main_3,make_sound;
 
 
         make_sound.setOnClickListener(new View.OnClickListener(){
-            EditText frequency = (EditText) findViewById(R.id.frequency);
-            EditText phase = (EditText) findViewById(R.id.phase);
-            EditText time = (EditText) findViewById(R.id.time);
-            EditText sample = (EditText)findViewById(R.id.sample);
+            EditText binary_num = (EditText)findViewById(R.id.binary_num);
             //final
-            int m_fre,m_pha,m_time,m_sam;
-
+            int m_fre,m_pha,m_sam;
+            double m_time,sample;
+            String bin;
             @Override
             public void onClick(View view) {
 
-                if (frequency.getText().length() <= 0 ){
-                    Toast.makeText(getApplicationContext(), "默认频率为440HZ.", Toast.LENGTH_SHORT).show();
-                        m_fre = 440;
-                }
-                else{
-                    m_fre = Integer.parseInt(frequency.getText().toString());
-                }
-                if(time.getText().length() <= 0){
-                    Toast.makeText(getApplicationContext(), "默认时间为3s.", Toast.LENGTH_SHORT).show();
-                    m_time  = 3;
+                m_sam = 48000;
+                m_fre = 18000;
+                m_time = 0.01;
+                sample  = m_sam * m_time;
+
+
+                if(binary_num.getText().length() <= 0){
+                    Toast.makeText(getApplicationContext(), "不能什么都不输入.", Toast.LENGTH_SHORT).show();
+
                 }else{
-                    m_time = Integer.parseInt(time.getText().toString());
-                }
-                if(phase.getText().length() <= 0){
-                    Toast.makeText(getApplicationContext(), "默认初始相位为300.", Toast.LENGTH_SHORT).show();
-                    m_pha  = 300;
-                }else{
-                    m_pha = Integer.parseInt(phase.getText().toString());
-                }
-                if(sample.getText().length() <= 0){
-                    Toast.makeText(getApplicationContext(), "默认采样率为44000HZ.", Toast.LENGTH_SHORT).show();
-                    m_sam  = 44000;
-                }else{
-                    m_sam = Integer.parseInt(sample.getText().toString());
-                }
-                int num_sam = m_time * m_sam;
-                final double samples[] = new double[num_sam];
-                final short buffer[] = new short[num_sam];
+                    bin = binary_num.getText().toString();
+                    for (int i = 0 ;i < bin.length(); i++)
+                    {
+                        if(bin.charAt(i) == '0' || bin.charAt(i) == '1') {
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "请输入二进数.", Toast.LENGTH_SHORT).show();
+
+                            return;
+                        }
+                    }
+
+                    // impulse 만들어야하고 pause0 ,pasue1 만들어서 buffer애다가 때려박아야함
+                    final double samples[] = new double[num_sam];
+                    final short buffer[] = new short[num_sam];
 
                     for (int i = m_pha; i < m_time*m_sam; ++i)
                     {
@@ -76,12 +72,18 @@ Button To_main_3,make_sound;
                         buffer[i] = (short) (samples[i] * Short.MAX_VALUE);  // Higher amplitude increases volume
                     }
 
+
+
+                    //wav파일로 만드는것도 추가해야함
+
                     AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                             m_sam, AudioFormat.CHANNEL_OUT_MONO,
                             AudioFormat.ENCODING_PCM_16BIT, buffer.length,
                             AudioTrack.MODE_STATIC);
                     audioTrack.write(buffer, 0, buffer.length);
                     audioTrack.play();
+                }
+
                 }
 
         });
