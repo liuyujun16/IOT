@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Make">
+
+    <EditText
+        android:id="@+id/sample"
+        android:layout_width="0dp"
+        android:layout_height="78dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:hint="采样率"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="@+id/frequency"
+        app:layout_constraintStart_toStartOf="@+id/make_sound"
+        app:layout_constraintTop_toBottomOf="@+id/make_sound" />
+
+    <EditText
+        android:id="@+id/phase"
+        android:layout_width="0dp"
+        android:layout_height="83dp"
+        android:hint="初始相位"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="@+id/time"
+        app:layout_constraintStart_toStartOf="@+id/time"
+        app:layout_constraintTop_toBottomOf="@+id/frequency" />
+
+    <EditText
+        android:id="@+id/time"
+        android:layout_width="202dp"
+        android:layout_height="86dp"
+        android:hint="持续时间"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/phase" />
+
+    <EditText
+        android:id="@+id/frequency"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginRight="6dp"
+        android:hint="频率"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="@+id/phase"
+        app:layout_constraintStart_toEndOf="@+id/to_main_3"
+        app:layout_constraintTop_toBottomOf="@+id/sample" />
+
+    <Button
+        android:id="@+id/make_sound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="36dp"
+        android:text="MAKE SOUND"
+        app:layout_constraintStart_toEndOf="@+id/to_main_3"
+        app:layout_constraintTop_toBottomOf="@+id/to_main_3" />
+
+    <Button
+        android:id="@+id/to_main_3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="6dp"
+        android:text="Main"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
