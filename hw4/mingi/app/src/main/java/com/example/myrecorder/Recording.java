@@ -151,6 +151,8 @@ public class Recording extends AppCompatActivity {
                 int bufferReadResult = audioRecord.read(buffer, 0, bufferSize);
                 for (int i = 0; i < bufferReadResult; i++) {
                     dos.write(buffer[i]);
+                    System.out.println(buffer[i]);
+
                 }
             }
             //停止audioRecord，关闭输出流
