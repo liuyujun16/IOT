@@ -15,13 +15,17 @@ import android.widget.Toast;
 import android.widget.EditText;
 
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,7 +41,8 @@ public class Recording extends AppCompatActivity {
     boolean isRecording = false;
     //每次从audiorecord输入流中获取到的buffer的大小
     int bufferSize = 0;
-
+    byte[] data = new byte[bufferSize];
+    String filepath ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +80,11 @@ public class Recording extends AppCompatActivity {
 
                         String name = Environment.getExternalStorageDirectory().getAbsolutePath()+"/myrecorder/raw.wav";
                         //调用开始录音函数，并把原始数据保存在指定的文件中
-                        StartRecord(name);
+                        data = StartRecord(name);
+//                        System.out.println(bufferSize);
+//                        for(int i =0; i<bufferSize;i++){
+//                            System.out.println(data[i]);
+//                        }
                         //获取此刻的时间
                         Date now = Calendar.getInstance().getTime();
                         file_name = now.toString().substring(0,19);
@@ -83,9 +92,35 @@ public class Recording extends AppCompatActivity {
                         file_name = file_name.replaceAll(":",".");
                         System.out.println("이름이야"+file_name);
                         //用此刻时间为最终的录音wav文件命名
-                        String filepath =Environment.getExternalStorageDirectory().getAbsolutePath()+"/myrecorder/"+file_name+".wav";
+                        filepath =Environment.getExternalStorageDirectory().getAbsolutePath()+"/myrecorder/"+file_name+".wav";
+                        System.out.println(filepath);
+
                         //把录到的原始数据写入到wav文件中。
                         copyWaveFile(name, filepath);
+
+                        System.out.println(filepath);
+                        File file = new File(filepath);
+                        InputStream fis = null;
+                        try {
+                            fis = new FileInputStream(file);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        byte[] audio_data = new byte[(int)file.length()];
+
+
+                        try {
+                            fis.read(audio_data, 0, audio_data.length);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            fis.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        demodulate(audio_data);
+
                     }
                 });
                 //开启线程
@@ -94,14 +129,18 @@ public class Recording extends AppCompatActivity {
         });
 
         StopRecord.setOnClickListener(new View.OnClickListener() {
-            @Override
+
+                                          @Override
             public void onClick(View view) {
                 //停止录音
                 isRecording = false;
                 //恢复开始录音按钮，并禁用停止录音按钮
                 StopRecord.setEnabled(false);
                 StartRecord.setEnabled(true);
-            }
+
+                                          }
+
+
         });
         To_main = (Button) findViewById(R.id.to_main);
 
@@ -112,12 +151,43 @@ public class Recording extends AppCompatActivity {
                 finish();
             }
         });
+
+
+    }
+    public static float[] byteArrayToFloatArray(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        FloatBuffer fb = buffer.asFloatBuffer();
+        float[] floatArray = new float[fb.limit()];
+        fb.get(floatArray);
+        return floatArray;
     }
 
+
+    public void demodulate(byte[] audio_data){
+        double time =0.01;
+        int n,fs = 48000,window;
+        float[] audio = byteArrayToFloatArray(audio_data);
+
+        for (int i = 0 ;i<audio.length;i++){
+            if (Float.isNaN(audio[i])){
+                audio[i] = 0;
+            }
+        }
+        n = audio.length;
+        window = (int) (fs*time);
+        float[] impulse_fft = new float[n];
+
+
+
+
+    }
+
+
     //开始录音
-    public void StartRecord(String name) {
+    public byte[] StartRecord(String name) {
 
         //生成原始数据文件
+        System.out.println(name);
         File file = new File(name);
         file.mkdirs();
 
@@ -136,6 +206,9 @@ public class Recording extends AppCompatActivity {
             DataOutputStream dos = new DataOutputStream(bos);
             //获取在当前采样和信道参数下，每次读取到的数据buffer的大小
             bufferSize = AudioRecord.getMinBufferSize(SamplingRate, channelConfiguration, audioEncoding);
+
+            System.out.println(bufferSize);
+
             //建立audioRecord实例
             AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SamplingRate, channelConfiguration, audioEncoding, bufferSize);
 
@@ -151,16 +224,19 @@ public class Recording extends AppCompatActivity {
                 int bufferReadResult = audioRecord.read(buffer, 0, bufferSize);
                 for (int i = 0; i < bufferReadResult; i++) {
                     dos.write(buffer[i]);
-                    System.out.println(buffer[i]);
 
                 }
             }
             //停止audioRecord，关闭输出流
             audioRecord.stop();
             dos.close();
+
+            return buffer;
         } catch (Throwable t) {
             Log.e("MainActivity", "录音失败");
         }
+        byte [] aa = new byte[1];
+        return aa;
     }
     private void copyWaveFile(String inFileName, String outFileName)
     {
@@ -189,6 +265,9 @@ public class Recording extends AppCompatActivity {
             {
                 out.write(data);
             }
+            System.out.println("제발 시발 좀");
+            System.out.println(data.length);
+
             in.close();
             out.close();
         } catch (FileNotFoundException e)
